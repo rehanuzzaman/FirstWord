@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FirstWord AI | প্রথম শব্দ - শিশুদের বাংলা ভাষা সঙ্গী (Kids Game & Speech Studio)</title>
+  
+  <!-- Fonts: Baloo Da 2 (Bengali Cartoon/Game Font) + Fredoka (Playful Game English) + Hind Siliguri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Hind+Siliguri:wght@500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js for Deep Clinical Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="game-body">
+
+  <!-- Confetti / Star Particles Canvas -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN FULL-SCREEN GAME VIEWPORT -->
+  <!-- ========================================================================= -->
+  <div class="game-viewport" id="game-viewport">
+    
+    <!-- Top Game Heads-Up Display (HUD) -->
+    <header class="game-hud">
+      <!-- Player Profile Badge -->
+      <div class="hud-player-badge" id="hud-profile-btn" title="প্লেয়ার প্রোফাইল">
+        <div class="hud-avatar">
+          <span>🐯</span>
+          <div class="level-tag">Lv.২</div>
+        </div>
+        <div class="hud-player-info">
+          <span class="player-name">আরিয়ান</span>
+          <div class="xp-bar-wrap">
+            <div class="xp-bar-fill" style="width: 68%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Star & Gem Rewards -->
+      <div class="hud-center-stats">
+        <div class="gem-pill stars" title="অর্জিত তারা">
+          <span class="gem-icon">⭐</span>
+          <span class="gem-count" id="hud-stars">১২</span>
+        </div>
+        <div class="gem-pill streak" title="কথোপকথনের স্ট্রিক">
+          <span class="gem-icon">🔥</span>
+          <span class="gem-count">৭ দিন</span>
+        </div>
+        <div class="gem-pill words" title="নতুন শব্দ শেখা হয়েছে">
+          <span class="gem-icon">📖</span>
+          <span class="gem-count" id="hud-words">৪৮৫ শব্দ</span>
+        </div>
+      </div>
+
+      <!-- Right: Game Controls & Parent Dashboard Gateway -->
+      <div class="hud-right-controls">
+        <!-- Sound Effect Toggle -->
+        <button class="hud-circle-btn" id="sfx-toggle-btn" title="শব্দ অন/অফ">
+          <i data-lucide="volume-2"></i>
+        </button>
+
+        <!-- Fullscreen Toggle -->
+        <button class="hud-circle-btn" id="fullscreen-btn" title="ফুলস্ক্রিন গেম মোড">
+          <i data-lucide="maximize"></i>
+        </button>
+
+        <!-- Live AI Inspector Quick HUD Pill (For Presentations) -->
+        <button class="hud-pill-btn live-hud" id="hud-inspector-btn" title="AI ব্রেইন স্পাই">
+          <span class="pulse-indicator"></span>
+          <span>AI ব্রেইন</span>
+        </button>
+
+        <!-- PARENT / CLINICIAN GATEWAY (Opens Deep Dashboard) -->
+        <button class="hud-pill-btn parent-gate-btn" id="open-parent-gate-btn" title="মা-বাবার রিপোর্ট ও বিশ্লেষণ">
+          <i data-lucide="lock"></i>
+          <span>মা-বাবার জোন (ড্যাশবোর্ড)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Interactive Game World Scene -->
+    <main class="game-world" id="game-world-scene">
+      
+      <!-- Parallax Animated Sky Layer -->
+      <div class="world-sky-layer">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="golden-sun"></div>
+      </div>
+
+      <!-- Background Scenery Layer (Landscape, trees, fruit shop stall) -->
+      <div class="world-backdrop" id="world-backdrop">
+        <!-- Wooden Shop Awning -->
+        <div class="shop-awning">
+          <div class="awning-stripe red"></div>
+          <div class="awning-stripe white"></div>
+          <div class="awning-stripe red"></div>
+          <div class="awning-stripe white"></div>
+          <div class="awning-stripe red"></div>
+          <div class="awning-stripe white"></div>
+          <div class="awning-stripe red"></div>
+        </div>
+        <div class="shop-signboard" id="game-quest-title">
+          🍎 ফল ও মিষ্টির জাদুর দোকান
+        </div>
+      </div>
+
+      <!-- Interactive Scene Toys / Props (Tap to talk about them!) -->
+      <div class="interactive-props-stage" id="interactive-props">
+        <!-- Apple Basket -->
+        <div class="prop-item apple-basket" onclick="tapGameItem('লাল আপেল', 'apple')" title="ট্যাপ করো আপেল সম্পর্কে কথা বলতে!">
+          <div class="prop-float-hint">ট্যাপ করো! 👆</div>
+          <span class="prop-emoji">🍎</span>
+          <span class="prop-label">লাল আপেল</span>
+        </div>
+
+        <!-- Mango Basket -->
+        <div class="prop-item mango-basket" onclick="tapGameItem('মিষ্টি আম', 'mango')" title="ট্যাপ করো আম সম্পর্কে কথা বলতে!">
+          <span class="prop-emoji">🥭</span>
+          <span class="prop-label">পাকা আম</span>
+        </div>
+
+        <!-- Banana Bunch -->
+        <div class="prop-item banana-bunch" onclick="tapGameItem('হলুদ কলা', 'banana')" title="ট্যাপ করো কলা সম্পর্কে কথা বলতে!">
+          <span class="prop-emoji">🍌</span>
+          <span class="prop-label">হলুদ কলা</span>
+        </div>
+
+        <!-- Toy Car (For rhotic practice) -->
+        <div class="prop-item toy-car" onclick="tapGameItem('লাল গাড়ি', 'car')" title="ট্যাপ করো গাড়ি নিয়ে খেলতে!">
+          <span class="prop-emoji">🚗</span>
+          <span class="prop-label">লাল গাড়ি</span>
+        </div>
+
+        <!-- Flying Bird Prop -->
+        <div class="prop-item flying-bird" onclick="tapGameItem('রঙিন পাখি', 'bird')" title="ট্যাপ করো পাখি নিয়ে কথা বলতে!">
+          <span class="prop-emoji">🦜</span>
+          <span class="prop-label">রঙিন পাখি</span>
+        </div>
+      </div>
+
+      <!-- Character Stage (Mitu with Animated Rig & Comic Speech Balloon) -->
+      <div class="companion-center-stage">
+        
+        <!-- Comic Speech Balloon from Mitu -->
+        <div class="comic-speech-balloon" id="speech-balloon">
+          <div class="balloon-speaker-tag">
+            <span class="speaker-icon">🐯</span> মিথু বলছে:
+          </div>
+          <div class="balloon-body">
+            <p id="mitu-dialogue-text">
+              "আরিয়ান দোস্ত! আমার দোকানে দেখো কত মজার মিষ্টি পাকা আম আর লাল আপেল আছে! তোমার কোনটা বেশি খেতে ইচ্ছে করছে?"
+            </p>
+          </div>
+          <div class="balloon-footer">
+            <button class="balloon-audio-btn" id="balloon-replay-btn" title="আবার শোনো">
+              <i data-lucide="volume-2"></i> আবার শোনো
+            </button>
+            <span class="balloon-quest-hint" id="balloon-quest-hint">
+              🎯 মিশন: পছন্দের ফলটি বেছে নিয়ে ২-৩ শব্দের বাক্য বলো
+            </span>
+          </div>
+        </div>
+
+        <!-- Mitu's Animated Character Rig -->
+        <div class="mitu-game-character" id="mitu-character" onclick="pokeMituCharacter()">
+          <!-- Live Emotion Mood Ring -->
+          <div class="mitu-mood-bubble" id="mitu-mood-bubble">
+            <span>খুশি 🥳</span>
+          </div>
+
+          <!-- Mitu SVG Rig -->
+          <div class="svg-avatar-rig" id="mitu-avatar">
+            <svg viewBox="0 0 280 280" width="280" height="280" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gameBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF9F43" />
+                  <stop offset="100%" stop-color="#FF5252" />
+                </linearGradient>
+                <linearGradient id="gameBellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFF5EB" />
+                  <stop offset="100%" stop-color="#FFE0B2" />
+                </linearGradient>
+                <filter id="gameGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#FF5252" flood-opacity="0.35"/>
+                </filter>
+              </defs>
+
+              <!-- Dynamic Shadow -->
+              <ellipse cx="140" cy="256" rx="75" ry="14" fill="rgba(0,0,0,0.18)" />
+
+              <!-- Cute Ears with Physics -->
+              <g class="ears-group">
+                <path d="M 65 95 C 45 40, 95 30, 105 75 Z" fill="#FF5252" />
+                <path d="M 72 88 C 58 52, 92 46, 98 76 Z" fill="#FFE0B2" />
+                <path d="M 215 95 C 235 40, 185 30, 175 75 Z" fill="#FF5252" />
+                <path d="M 208 88 C 222 52, 188 46, 182 76 Z" fill="#FFE0B2" />
+              </g>
+
+              <!-- Body -->
+              <ellipse cx="140" cy="180" rx="88" ry="76" fill="url(#gameBodyGrad)" filter="url(#gameGlow)"/>
+              <!-- Belly -->
+              <ellipse cx="140" cy="195" rx="55" ry="50" fill="url(#gameBellyGrad)" />
+              <!-- Tiger Stripes -->
+              <path d="M 54 175 Q 75 178 60 190" stroke="#B71C1C" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M 58 150 Q 80 156 68 165" stroke="#B71C1C" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M 226 175 Q 205 178 220 190" stroke="#B71C1C" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <path d="M 222 150 Q 200 156 212 165" stroke="#B71C1C" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+              <!-- Head -->
+              <circle cx="140" cy="115" r="70" fill="url(#gameBodyGrad)" />
+              <!-- Forehead Tiger Pattern -->
+              <path d="M 140 55 L 140 75" stroke="#7F1D1D" stroke-width="4.5" stroke-linecap="round" />
+              <path d="M 128 62 L 138 72" stroke="#7F1D1D" stroke-width="3.5" stroke-linecap="round" />
+              <path d="M 152 62 L 142 72" stroke="#7F1D1D" stroke-width="3.5" stroke-linecap="round" />
+
+              <!-- Eyes with Blinking Animation -->
+              <g class="avatar-eyes">
+                <ellipse id="eye-left" cx="112" cy="110" rx="12" ry="15" fill="#1E293B" />
+                <circle cx="116" cy="105" r="4.5" fill="#FFFFFF" />
+                <circle cx="109" cy="114" r="2" fill="#FFFFFF" />
+
+                <ellipse id="eye-right" cx="168" cy="110" rx="12" ry="15" fill="#1E293B" />
+                <circle cx="172" cy="105" r="4.5" fill="#FFFFFF" />
+                <circle cx="165" cy="114" r="2" fill="#FFFFFF" />
+              </g>
+
+              <!-- Cute Rosy Cheeks -->
+              <ellipse cx="92" cy="128" rx="12" ry="7" fill="#FF8A80" opacity="0.8" />
+              <ellipse cx="188" cy="128" rx="12" ry="7" fill="#FF8A80" opacity="0.8" />
+
+              <!-- Snout & Nose -->
+              <ellipse cx="140" cy="130" rx="24" ry="17" fill="#FFE0B2" />
+              <polygon points="134,124 146,124 140,131" fill="#7F1D1D" />
+
+              <!-- Mouth Rig -->
+              <g class="avatar-mouth-group">
+                <path id="mouth-path" d="M 130 135 Q 140 146 150 135" stroke="#7F1D1D" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                <ellipse id="mouth-talking" cx="140" cy="138" rx="9" ry="8" fill="#7F1D1D" style="display:none;" />
+              </g>
+
+              <!-- Hands Resting -->
+              <circle cx="95" cy="198" r="16" fill="#FFE0B2" stroke="#FF9F43" stroke-width="2.5"/>
+              <circle cx="185" cy="198" r="16" fill="#FFE0B2" stroke="#FF9F43" stroke-width="2.5"/>
+            </svg>
+          </div>
+
+          <!-- Talking Sound Wave -->
+          <div class="game-voice-wave" id="game-voice-wave">
+            <span class="wave-stick"></span>
+            <span class="wave-stick"></span>
+            <span class="wave-stick"></span>
+            <span class="wave-stick"></span>
+            <span class="wave-stick"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Floating Game Control Console -->
+      <footer class="game-bottom-console">
+        
+        <!-- Left: Game Worlds / Stage Select Carousel -->
+        <div class="world-portal-dock">
+          <div class="dock-label">জগতের মানচিত্র 🗺️</div>
+          <div class="portal-buttons-track">
+            <button class="portal-btn active" data-world="grocery" title="ফলের বাজার">
+              <span class="portal-emoji">🍎</span>
+              <span class="portal-name">বাজার</span>
+            </button>
+            <button class="portal-btn" data-world="jungle" title="জাদুর বন ও পাখি">
+              <span class="portal-emoji">🦜</span>
+              <span class="portal-name">জাদুর বন</span>
+            </button>
+            <button class="portal-btn" data-world="emotions" title="অনুভূতির বাড়ি">
+              <span class="portal-emoji">🎭</span>
+              <span class="portal-name">অনুভূতি</span>
+            </button>
+            <button class="portal-btn" data-world="riddle" title="শব্দ জাদুকর">
+              <span class="portal-emoji">🪄</span>
+              <span class="portal-name">ধাঁধা</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center: GIANT ARCADE MIC BUTTON (Push-to-Talk) -->
+        <div class="arcade-mic-container">
+          <div class="mic-glow-halo"></div>
+          
+          <button class="giant-arcade-mic-btn" id="arcade-mic-btn">
+            <div class="mic-ring-pulse"></div>
+            <div class="mic-inner-sphere">
+              <i data-lucide="mic" id="arcade-mic-icon"></i>
+            </div>
+            <span class="mic-action-title" id="arcade-mic-label">কথা বলতে চাপো!</span>
+          </button>
+          
+          <div class="child-quick-dialogue-bar" id="game-quick-phrases">
+            <button class="game-speech-pill" onclick="sendChildVoiceSimulation('আমাকে একটা লাল আপেল দাও')">
+              "আমাকে একটা লাল আপেল দাও"
+            </button>
+            <button class="game-speech-pill" onclick="sendChildVoiceSimulation('আমটা অনেক মিষ্টি')">
+              "আমটা অনেক মিষ্টি"
+            </button>
+            <button class="game-speech-pill" onclick="sendChildVoiceSimulation('গাদি করে বাড়ি যাব')">
+              "গাদি করে বাড়ি যাব" (ভুল উচ্চারণ টেস্ট)
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Pitch Simulation Preset Shortcuts (Hidden/Collapsible for Pitchers) -->
+        <div class="game-demo-dock">
+          <div class="dock-label">দ্রুত ডেমো শর্টকাট ⚡</div>
+          <div class="demo-buttons-track">
+            <button class="demo-chip" onclick="simulateSpeechPreset('short_answer')">
+              ১. ছোট উত্তর ("আম")
+            </button>
+            <button class="demo-chip" onclick="simulateSpeechPreset('rhotic_mispronounce')">
+              ২. 'ড়/র' ভুল ("গাদি")
+            </button>
+            <button class="demo-chip" onclick="simulateSpeechPreset('hesitant_emotion')">
+              ৩. দ্বিধা ও অনুভূতি
+            </button>
+            <button class="demo-chip" onclick="simulateSpeechPreset('complex_success')">
+              ৪. সফল পূর্ণাঙ্গ বাক্য
+            </button>
+          </div>
+        </div>
+
+      </footer>
+
+      <!-- Floating Live AI Loop Inspector (HUD Overlay, Toggleable) -->
+      <aside class="floating-ai-hud" id="floating-ai-hud">
+        <div class="ai-hud-header">
+          <div class="hud-tag"><i data-lucide="cpu"></i> AI ব্রেইন লাইভ টেলিমেট্রি</div>
+          <button class="hud-close-x" id="close-ai-hud-btn">×</button>
+        </div>
+        <div class="ai-hud-content">
+          <div class="ai-stat-row">
+            <span class="label">MLU (শব্দ দৈর্ঘ্য):</span>
+            <strong class="val" id="hud-mlu-val">১.৩ শব্দ</strong>
+          </div>
+          <div class="ai-stat-row">
+            <span class="label">টার্গেট ধ্বনি:</span>
+            <strong class="val warning" id="hud-target-phoneme">‘ড়’ সাবস্টিটিউশন</strong>
+          </div>
+          <div class="ai-stat-row">
+            <span class="label">ক্লিনিকাল কৌশল:</span>
+            <strong class="val green" id="hud-strategy-val">Recasting & Modeling</strong>
+          </div>
+          <p class="ai-hud-explanation" id="hud-explanation-text">
+            শিশু ১-শব্দে উত্তর দিয়েছে; মিথু তাকে বাধা না দিয়ে স্বয়ংক্রিয়ভাবে পূর্ণাঙ্গ বাক্য ফিরিয়ে দিচ্ছে।
+          </p>
+        </div>
+      </aside>
+
+    </main>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PARENT GATEWAY MODAL (PIN UNLOCK FOR ADULTS) -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="parent-gate-modal" style="display: none;">
+    <div class="game-modal-card parent-gate-box">
+      <div class="gate-header">
+        <div class="lock-shield">🔒</div>
+        <h3>মা-বাবার সিক্রেট জোন</h3>
+        <p>শুধুমাত্র অভিভাবক ও স্পিচ থেরাপিস্টদের বিস্তারিত রিপোর্ট দেখতে নিচের সহজ অঙ্কটি সমাধান করুন:</p>
+      </div>
+      <div class="math-challenge">
+        <span class="challenge-text" id="parent-gate-question">৫ + ৩ = ?</span>
+        <input type="number" id="parent-gate-answer" placeholder="উত্তর লিখুন" autocomplete="off">
+      </div>
+      <div class="gate-actions">
+        <button class="game-btn secondary" onclick="closeParentGateModal()">ফিরে যাও খেলায়</button>
+        <button class="game-btn primary" onclick="verifyParentGatePin(true)">
+          <i data-lucide="check"></i> ড্যাশবোর্ড খুলুন
+        </button>
+      </div>
+      <p class="gate-bypass-hint">(ডেমোর সুবিধার জন্য যেকোনো বাটনে ক্লিক করলেই খুলবে)</p>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- FULL PARENT & CLINICAL MISSION CONTROL OVERLAY (IN-DEPTH DASHBOARD) -->
+  <!-- ========================================================================= -->
+  <div class="parent-dashboard-overlay" id="parent-dashboard-overlay" style="display: none;">
+    <div class="parent-dashboard-sheet">
+      
+      <!-- Dashboard Top App Bar -->
+      <header class="dash-control-bar">
+        <div class="dash-bar-left">
+          <button class="back-to-game-btn" onclick="closeParentDashboard()">
+            <i data-lucide="arrow-left"></i>
+            <span>মিথুর খেলায় ফিরে যান</span>
+          </button>
+          <div class="dash-title-group">
+            <h2>FirstWord AI • অভিভাবক ও ক্লিনিকাল মিশন কন্ট্রোল</h2>
+            <span class="patient-pill">আরিয়ান আহমেদ (৪ বছর ৮ মাস) • পেশাদার স্পিচ অ্যানালিটিক্স</span>
+          </div>
+        </div>
+
+        <div class="dash-bar-right">
+          <!-- Split Screen Toggle (Presentation Mode) -->
+          <button class="dash-pill-btn split-toggle-btn" id="split-screen-toggle-btn" onclick="toggleSplitScreenMode()">
+            <i data-lucide="columns"></i>
+            <span id="split-btn-text">স্প্লিট স্ক্রিন মোড (গেম + ড্যাশবোর্ড)</span>
+          </button>
+
+          <!-- Print / PDF Report -->
+          <button class="dash-pill-btn" onclick="printClinicalReport()">
+            <i data-lucide="printer"></i>
+            <span>রিপোর্ট প্রিন্ট / PDF</span>
+          </button>
+
+          <!-- Share with SLP -->
+          <button class="dash-pill-btn primary" onclick="openTherapistShareModal()">
+            <i data-lucide="share-2"></i>
+            <span>থেরাপিস্টের সাথে শেয়ার</span>
+          </button>
+
+          <button class="close-dash-x" onclick="closeParentDashboard()">×</button>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <div class="dash-sheet-content">
+
+        <!-- Non-Medical Screening Disclaimer Banner -->
+        <div class="clinical-disclaimer-banner">
+          <div class="disc-icon"><i data-lucide="info"></i></div>
+          <div class="disc-text">
+            <strong>ক্লিনিকাল স্ক্রিনিং নির্দেশিকা:</strong> ফার্স্টওয়ার্ড এআই কোনো মেডিকেল রোগ নির্ণয়কারী (Diagnostic) টুল নয়। এটি একটি ইন্টারেক্টিভ ল্যাঙ্গুয়েজ লার্নিং সঙ্গী ও প্রাথমিক স্ক্রিনার। যদি 'র/ড়' ধ্বনি বা বাক্য গঠনে জড়তা ৫ বছর বয়স পর্যন্ত অপরিবর্তিত থাকে, তবে একজন সার্টিফাইড স্পিচ অ্যান্ড ল্যাঙ্গুয়েজ থেরাপিস্ট (SLP)-এর পরামর্শ গ্রহণের জন্য অ্যালার্ট দেয়া হবে।
+          </div>
+        </div>
+
+        <!-- Key Metrics 4-Grid Cards -->
+        <div class="metrics-summary-grid">
+          
+          <div class="summary-metric-card">
+            <div class="metric-top">
+              <span class="metric-title">সক্রিয় স্ক্রিন কথোপকথন বনাম নিষ্ক্রিয়</span>
+              <div class="metric-icon blue"><i data-lucide="sparkles"></i></div>
+            </div>
+            <div class="metric-big-num">৮৪% <span class="unit">দ্বিমুখী কথা</span></div>
+            <div class="metric-trend positive">
+              <i data-lucide="trending-up"></i> কার্টুন দেখার মতো প্যাসিভ স্ক্রিনটাইম কমেছে
+            </div>
+            <div class="progress-linear">
+              <div class="progress-fill blue" style="width: 84%;"></div>
+            </div>
+            <span class="metric-foot">সাধারণ ইউটিউব দেখার সময় ০% সক্রিয় কথা হয়</span>
+          </div>
+
+          <div class="summary-metric-card">
+            <div class="metric-top">
+              <span class="metric-title">MLU (গড় বাক্যের দৈর্ঘ্য - শব্দ সংখ্যা)</span>
+              <div class="metric-icon green"><i data-lucide="align-left"></i></div>
+            </div>
+            <div class="metric-big-num">৩.৪ <span class="unit">শব্দ / বাক্য</span></div>
+            <div class="metric-trend positive">
+              <i data-lucide="trending-up"></i> +১.২ শব্দ বৃদ্ধি (গত ৮ সপ্তাহে)
+            </div>
+            <div class="progress-linear">
+              <div class="progress-fill green" style="width: 72%;"></div>
+            </div>
+            <span class="metric-foot">৪-৫ বছর বয়সী শিশুর স্বাভাবিক মান: ৩.০ - ৪.৫ শব্দ</span>
+          </div>
+
+          <div class="summary-metric-card">
+            <div class="metric-top">
+              <span class="metric-title">উচ্চারণ স্পষ্টতা সূচক (Pronunciation)</span>
+              <div class="metric-icon orange"><i data-lucide="mic-2"></i></div>
+            </div>
+            <div class="metric-big-num">৭৮% <span class="unit">স্পষ্ট</span></div>
+            <div class="metric-trend warning">
+              <i data-lucide="alert-triangle"></i> 'র' বনাম 'ড়' ধ্বনিতে মৃদু অস্পষ্টতা
+            </div>
+            <div class="progress-linear">
+              <div class="progress-fill orange" style="width: 78%;"></div>
+            </div>
+            <span class="metric-foot">‘গাড়ী’ কে ‘গাদী’ বলা ধীরে ধীরে কমছে</span>
+          </div>
+
+          <div class="summary-metric-card">
+            <div class="metric-top">
+              <span class="metric-title">সামাজিক ও অনুভূতি প্রকাশ স্কোর</span>
+              <div class="metric-icon purple"><i data-lucide="heart-handshake"></i></div>
+            </div>
+            <div class="metric-big-num">৮২/১০০</div>
+            <div class="metric-trend positive">
+              <i data-lucide="trending-up"></i> দ্বিধাবোধ কাটিয়ে কথা বলায় আত্মবিশ্বাসী
+            </div>
+            <div class="progress-linear">
+              <div class="progress-fill purple" style="width: 82%;"></div>
+            </div>
+            <span class="metric-foot">নিজের পছন্দ ও অনুভূতি ব্যক্ত করার হার বৃদ্ধি</span>
+          </div>
+
+        </div>
+
+        <!-- Main Analytics Rows: Charts & In-depth Evaluations -->
+        <div class="dashboard-analytics-row">
+          
+          <!-- Left: 6 Core Pillars Radar Chart -->
+          <div class="chart-card flex-2">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="compass"></i> ৬টি মূল ভাষা-বিকাশ স্তম্ভ (Core Developmental Pillars)</h3>
+                <p class="card-subtitle">আরিয়ানের বর্তমান অর্জিত দক্ষতা বনাম তার বয়সোপযোগী স্বাভাবিক প্রত্যাশিত মাত্রা</p>
+              </div>
+              <div class="legend-indicator">
+                <span class="legend-dot user-score"></span> আরিয়ান
+                <span class="legend-dot benchmark"></span> বয়সোপযোগী বেঞ্চমার্ক
+              </div>
+            </div>
+            <div class="radar-chart-wrapper">
+              <canvas id="developmentRadarChart"></canvas>
+            </div>
+            <div class="pillar-notes-grid">
+              <div class="p-note-item"><strong>১. শব্দভাণ্ডার:</strong> ৮৮% (উন্নত)</div>
+              <div class="p-note-item"><strong>২. বাক্য গঠন:</strong> ৭৮% (স্বাভাবিক)</div>
+              <div class="p-note-item"><strong>৩. উচ্চারণ ও ধ্বনি:</strong> ৬৯% (অনুশীলন দরকার)</div>
+              <div class="p-note-item"><strong>৪. ব্যাকরণ ও কাল:</strong> ৭৪% (স্বাভাবিক)</div>
+              <div class="p-note-item"><strong>৫. শ্রবণ ও মনোযোগ:</strong> ৮৫% (খুব ভালো)</div>
+              <div class="p-note-item"><strong>৬. সামাজিক যোগাযোগ:</strong> ৮২% (আত্মবিশ্বাসী)</div>
+            </div>
+          </div>
+
+          <!-- Right: Weekly MLU & Vocabulary Growth Trend -->
+          <div class="chart-card flex-3">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="trending-up"></i> বাক্য দৈর্ঘ্য (MLU) ও শব্দভাণ্ডার অগ্রগতির ধারা</h3>
+                <p class="card-subtitle">৮ সপ্তাহের ধারাবাহিক রূপান্তর: ১ শব্দের উত্তর থেকে পূর্ণ বাক্যে উত্তরণ</p>
+              </div>
+              <div class="chart-filter-toggle">
+                <span class="filter-chip active">গত ৮ সপ্তাহ</span>
+                <span class="filter-chip">দৈনিক গড়</span>
+              </div>
+            </div>
+            <div class="line-chart-wrapper">
+              <canvas id="growthTrendChart"></canvas>
+            </div>
+            <div class="chart-insight-callout">
+              <i data-lucide="lightbulb"></i>
+              <div>
+                <strong>AI অভিযোজন অন্তর্দৃষ্টি:</strong> ৫ম সপ্তাহে যখন 'দোকানের খেলা' ও 'গল্প পূরণ' শুরু হয়, তখন এক-শব্দের উত্তর থেকে শিশু ৩-৪ শব্দের যৌগিক বাক্যে দ্রুত অগ্রসর হয়।
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Phoneme Breakdown Matrix & The Continuous Loop Timeline -->
+        <div class="dashboard-analytics-row">
+          
+          <!-- Phoneme Breakdown Matrix for Speech Articulation -->
+          <div class="chart-card flex-3">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="mic"></i> বাংলা বর্ণ ও ধ্বনি উচ্চারণ নির্ভুলতা ম্যাট্রিক্স (Phoneme Heatmap)</h3>
+                <p class="card-subtitle">বাংলা ভাষার নির্দিষ্ট স্পর্শ ও তাড়নজাত ধ্বনিতে শিশুর পারদর্শিতা</p>
+              </div>
+              <span class="badge-pill">স্পিচ স্ক্রিনিং স্পেশাল</span>
+            </div>
+
+            <div class="phoneme-matrix-table">
+              <div class="p-table-head">
+                <div class="col-phoneme">ধ্বনি / বর্ণমালা</div>
+                <div class="col-category">ধ্বনি প্রকার</div>
+                <div class="col-sample">উদাহরণ শব্দ</div>
+                <div class="col-acc">নির্ভুলতা</div>
+                <div class="col-status">অবস্থা ও সুপারিশ</div>
+              </div>
+
+              <div class="p-table-row">
+                <div class="col-phoneme"><span class="phoneme-badge green">প, ব, ম</span></div>
+                <div class="col-category">ওষ্ঠ্য ধ্বনি (Bilabial)</div>
+                <div class="col-sample">বাবা, পানি, মিষ্টি</div>
+                <div class="col-acc"><span class="acc-pill high">৯৬%</span></div>
+                <div class="col-status"><span class="status-tag success">সম্পূর্ণ অর্জিত ✓</span></div>
+              </div>
+
+              <div class="p-table-row">
+                <div class="col-phoneme"><span class="phoneme-badge green">ত, দ, ন</span></div>
+                <div class="col-category">দন্ত্য ধ্বনি (Dental)</div>
+                <div class="col-sample">তারা, দাদা, নদী</div>
+                <div class="col-acc"><span class="acc-pill high">৯২%</span></div>
+                <div class="col-status"><span class="status-tag success">স্বাভাবিক বিকাশ</span></div>
+              </div>
+
+              <div class="p-table-row alert-row">
+                <div class="col-phoneme"><span class="phoneme-badge yellow">র (r) বনাম ড় (ɽ)</span></div>
+                <div class="col-category">কম্পন ও তাড়নজাত (Trill/Flap)</div>
+                <div class="col-sample">গাড়ি, পাখি, বড়, রাস্তা</div>
+                <div class="col-acc"><span class="acc-pill medium">৫৮%</span></div>
+                <div class="col-status">
+                  <span class="status-tag warning">লক্ষণীয়: ‘ড়’ কে ‘দ’ বলা</span>
+                  <span class="sub-act">মিথু পাখির ডাকে খেলা করাচ্ছে</span>
+                </div>
+              </div>
+
+              <div class="p-table-row">
+                <div class="col-phoneme"><span class="phoneme-badge green">শ, ষ, স</span></div>
+                <div class="col-category">উষ্ম ধ্বনি (Sibilants)</div>
+                <div class="col-sample">সূর্য, শাপলা, সিংহ</div>
+                <div class="col-acc"><span class="acc-pill good">৭৯%</span></div>
+                <div class="col-status"><span class="status-tag success">উন্নতিশীল</span></div>
+              </div>
+
+              <div class="p-table-row">
+                <div class="col-phoneme"><span class="phoneme-badge green">খ, ঘ, ছ, ঝ, থ</span></div>
+                <div class="col-category">মহাপ্রাণ ধ্বনি (Aspirated)</div>
+                <div class="col-sample">ঘাস, পাখি, ছাতা, থালা</div>
+                <div class="col-acc"><span class="acc-pill good">৭৫%</span></div>
+                <div class="col-status"><span class="status-tag success">বয়সোপযোগী স্বাভাবিক</span></div>
+              </div>
+            </div>
+
+            <div class="phoneme-audio-proof-box">
+              <div class="proof-left">
+                <i data-lucide="headphones"></i>
+                <div>
+                  <strong>অডিও ক্লিপ তুলনা (Acoustic Comparison):</strong>
+                  <span>সেশন #৩ (১৮ দিন আগে): "গাদি যাবো" ➔ সেশন #১৮ (গতকাল): "গাড়িতে উঠবো"</span>
+                </div>
+              </div>
+              <button class="audio-play-chip" onclick="simulatePlayAcousticSample()">
+                <i data-lucide="play"></i> প্লে করুন
+              </button>
+            </div>
+          </div>
+
+          <!-- The AI Adaptive Loop in Real Action (Case Study Timeline) -->
+          <div class="chart-card flex-2">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="cpu"></i> এআই অভিযোজন ইতিহাস (Adaptive Intelligence)</h3>
+                <p class="card-subtitle">দুর্বলতা শনাক্ত করে কীভাবে খেলার পরিবেশ বদলে দেওয়া হয়েছে</p>
+              </div>
+            </div>
+
+            <div class="adaptive-timeline">
+              <div class="timeline-node">
+                <div class="timeline-dot red">১</div>
+                <div class="timeline-content">
+                  <div class="t-date">১৫ দিন আগে • প্রাথমিক পর্যবেক্ষণ</div>
+                  <div class="t-heading">১ শব্দের উত্তর ও সীমিত শব্দভাণ্ডার</div>
+                  <p class="t-text">শিশু শুধু "ভাত", "পানি", "আম" বলে থামতো। কোনো বিশেষণ বা ক্রিয়াপদ যুক্ত করতো না।</p>
+                  <span class="t-tag orange">MLU: ১.২ শব্দ</span>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot blue">২</div>
+                <div class="timeline-content">
+                  <div class="t-date">১২ দিন আগে • এআই অভিযোজন</div>
+                  <div class="t-heading">স্বয়ংক্রিয়ভাবে "দোকানের ভূমিকা-খেলা" তৈরি</div>
+                  <p class="t-text">মিথু শিশুকে দোকানদার সাজিয়ে জিনিসপত্র অর্ডার করতে অনুরোধ জানায়। শিশু প্রশ্ন করতে শেখে।</p>
+                  <span class="t-tag blue">Activity Pivoted: Roleplay Store</span>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot purple">৩</div>
+                <div class="timeline-content">
+                  <div class="t-date">৬ দিন আগে • ধ্বনি ও উচ্চারণ লক্ষ্য</div>
+                  <div class="t-heading">'ড়' ধ্বনি অনুশীলনে "পাখির বাসা খোঁজার গল্প"</div>
+                  <p class="t-text">ঘোড়া, পাখি, বাড়ি, ঘুড়ি শব্দগুলো দিয়ে মজার ছড়া তৈরি করে স্বাভাবিক কথোপকথন চালানো হয়।</p>
+                  <span class="t-tag purple">Story Gen: Jungle Quest</span>
+                </div>
+              </div>
+
+              <div class="timeline-node">
+                <div class="timeline-dot green">৪</div>
+                <div class="timeline-content">
+                  <div class="t-date">আজকের অবস্থা • ফলাফল</div>
+                  <div class="t-heading">স্বতঃস্ফূর্ত ৪ শব্দের বাক্য ব্যবহার</div>
+                  <p class="t-text">"মিথু, আমাকে একটা লাল পাকা আপেল দাও না!" শিশু নিজে থেকে কথা সাজিয়ে বলছে।</p>
+                  <span class="t-tag green">MLU: ৩.৪ শব্দ (+১৮০% অগ্রগতি)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Family At-Home Actionable Prompts & Audio Replay Log -->
+        <div class="dashboard-analytics-row">
+          
+          <div class="chart-card flex-2">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="home"></i> পরিবারের জন্য আজকের কথোপকথন প্রম্পট</h3>
+                <p class="card-subtitle">ব্যস্ত বাবা-মায়ের জন্য সহজ ৩টি বাস্তব জীবনের কথা বলার টিপস</p>
+              </div>
+            </div>
+
+            <div class="parent-tips-list">
+              <div class="parent-tip-card">
+                <div class="tip-badge">আজকের রাতের খাবারের সময়</div>
+                <div class="tip-question">"আজকে তোমার পাতে কোন তরকারিটা সবচেয়ে বেশি মিষ্টি বা ঝাল লাগছে?"</div>
+                <div class="tip-rationale">
+                  <strong>উদ্দেশ্য:</strong> শিশুকে হ্যাঁ/না এর বাইরে স্বাদ ও অনুভূতি বর্ণনামূলক বাক্য বলতে উৎসাহিত করা।
+                </div>
+              </div>
+
+              <div class="parent-tip-card">
+                <div class="tip-badge">বিছানায় যাওয়ার আগে</div>
+                <div class="tip-question">"তুমি কি জানো আজ বিড়ালটা কেন দৌড়ে গাছে উঠেছিল?"</div>
+                <div class="tip-rationale">
+                  <strong>উদ্দেশ্য:</strong> কল্পনাভিত্তিক কারণ-ফলাফল ('কারণ', 'যেহেতু') যুক্ত বাক্য অনুশীলন।
+                </div>
+              </div>
+
+              <div class="parent-tip-card">
+                <div class="tip-badge">উচ্চারণ খেলা</div>
+                <div class="tip-question">"চলো দেখি ঘরের মধ্যে কোন কোন জিনিস দিয়ে 'ঘ' আর 'র' দিয়ে শব্দ হয়!" (যেমন: ঘড়ি, ঘর, ফুলদানি)</div>
+                <div class="tip-rationale">
+                  <strong>উদ্দেশ্য:</strong> খেলাচ্ছলে 'র' ধ্বনি শোনার অভ্যাস গড়ে তোলা।
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card flex-3">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="file-text"></i> ক্লিনিকাল অডিও সেশন লগ ও ট্রান্সক্রিপ্ট</h3>
+                <p class="card-subtitle">সর্বশেষ সেশন #১৮ এর স্বয়ংক্রিয় এআই বিশ্লেষণ ও টাইমস্ট্যাম্প</p>
+              </div>
+              <button class="small-btn" onclick="filterSessionTranscript()">
+                <i data-lucide="filter"></i> ফিল্টার
+              </button>
+            </div>
+
+            <div class="clinical-transcript-list">
+              <div class="c-log-row">
+                <div class="c-log-time">০২:১৫</div>
+                <div class="c-log-speaker child">শিশু</div>
+                <div class="c-log-body">
+                  <span class="quote">"আমি এই গাদিটা নিব"</span>
+                  <div class="annotation-tags">
+                    <span class="anno-pill red">Phonological Error: /d/ for /ɽ/ (গাড়ি ➔ গাদি)</span>
+                    <span class="anno-pill blue">Confidence: ৯১%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="c-log-row">
+                <div class="c-log-time">০২:১৭</div>
+                <div class="c-log-speaker ai">মিথু</div>
+                <div class="c-log-body">
+                  <span class="quote">"বাহ! লাল গাড়িটা তো খুব দ্রুত চলে! গাড়িটা কোথায় যাবে দোস্ত?"</span>
+                  <div class="annotation-tags">
+                    <span class="anno-pill green">Technique: Recasting (সঠিক উচ্চারণ স্বাভাবিকভাবে ফিরিয়ে দেওয়া)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="c-log-row">
+                <div class="c-log-time">০২:২৪</div>
+                <div class="c-log-speaker child">শিশু</div>
+                <div class="c-log-body">
+                  <span class="quote">"গাড়িতে উঠে নানার বাড়ি যাব!"</span>
+                  <div class="annotation-tags">
+                    <span class="anno-pill green">Target Achieved: 'গাড়িতে' সঠিক উচ্চারণ + ৪ শব্দের সম্প্রসারিত বাক্য!</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="c-log-row">
+                <div class="c-log-time">০২:৩০</div>
+                <div class="c-log-speaker ai">মিথু</div>
+                <div class="c-log-body">
+                  <span class="quote">"ওয়াও! দারুণ বলেছো! নানার বাড়িতে গিয়ে কী পিঠা খাবে?"</span>
+                  <div class="annotation-tags">
+                    <span class="anno-pill purple">Emotional Reinforcement: আত্মবিশ্বাস বৃদ্ধি</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="transcript-footer-action">
+              <button class="full-log-btn" onclick="exportFullTranscriptJSON()">
+                <i data-lucide="download"></i> সম্পূর্ণ সেশন ট্রান্সক্রিপ্ট ও ফনেটিক ডেটা ডাউনলোড (.JSON)
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3-Year Feasibility Roadmap Section Inside Dashboard -->
+        <div class="dashboard-analytics-row">
+          <div class="chart-card flex-3">
+            <div class="card-title-row">
+              <div>
+                <h3 class="card-title"><i data-lucide="milestone"></i> ৩ বছরের বাস্তবায়ন রোডম্যাপ (3-Year Feasibility Plan)</h3>
+                <p class="card-subtitle">ল্যাব প্রোটোটাইপ থেকে দেশজুড়ে প্রতিটি শিশুর হাতের নাগালে পৌঁছানোর রূপরেখা</p>
+              </div>
+            </div>
+
+            <div class="roadmap-grid">
+              <div class="roadmap-col year-1">
+                <div class="col-header">
+                  <div class="year-badge">Year 1</div>
+                  <h4>কোর মডেল ও ভ্যালিডেশন</h4>
+                  <span class="time-label">প্রথম ১২ মাস</span>
+                </div>
+                <ul class="roadmap-bullets">
+                  <li><strong>মূল দক্ষতা ফোকাস:</strong> শব্দভাণ্ডার, উচ্চারণ, বাক্য গঠন, শ্রবণ ও প্রাত্যহিক আলাপের এমভিপি।</li>
+                  <li><strong>বাংলা স্পিচ মডেল টিউনিং:</strong> শিশুদের স্বর ও অ্যাকসেন্টের ওপর ডেটাসেট ট্রেইনিং।</li>
+                  <li><strong>ক্লিনিকাল কোলাবোরেশন:</strong> বিএসএইচএ (BSHA) বিশেষজ্ঞদের সাথে যৌথ মূল্যায়ন।</li>
+                </ul>
+              </div>
+
+              <div class="roadmap-col year-2">
+                <div class="col-header">
+                  <div class="year-badge">Year 2</div>
+                  <h4>পাইলট ও স্বয়ংক্রিয় পারসোনালাইজেশন</h4>
+                  <span class="time-label">১৩ - ২৪ মাস</span>
+                </div>
+                <ul class="roadmap-bullets">
+                  <li><strong>ফিল্ড পাইলটিং:</strong> ৫০০+ পরিবারের সাথে স্ট্রাকচার্ড ট্রায়াল।</li>
+                  <li><strong>অভিযোজন ইঞ্জিন উন্নয়ন:</strong> প্রতিটি শিশুর নিজস্ব পারসোনালাইজেশন ইঞ্জিন।</li>
+                  <li><strong>অভিভাবক ড্যাশবোর্ড ও থেরাপিস্ট লিঙ্ক:</strong> সরাসরি ক্লিনিকাল রেফারাল সিস্টেম।</li>
+                </ul>
+              </div>
+
+              <div class="roadmap-col year-3">
+                <div class="col-header">
+                  <div class="year-badge">Year 3</div>
+                  <h4>স্কেল ও সমবয়সী ইন্টার‍্যাকশন</h4>
+                  <span class="time-label">২৫ - ৩৬ মাস</span>
+                </div>
+                <ul class="roadmap-bullets">
+                  <li><strong>লো-এন্ড স্মার্টফোনে অপটিমাইজেশন:</strong> অফলাইন ও লাইটওয়েট এআই ইনফারেন্স।</li>
+                  <li><strong>পিয়ার-টু-পিয়ার সামাজিক খেলা:</strong> দুই শিশুর মাঝে সহযোগিতামূলক কথোপকথন।</li>
+                  <li><strong>আঞ্চলিক উপভাষা সাপোর্ট:</strong> চট্টগ্রাম, সিলেট ও রাজশাহী অঞ্চলের টান শনাক্তকরণ।</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CLINICAL ASSESSMENT SUMMARY (PRINT / PDF PREVIEW) -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="clinical-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="m-title-group">
+          <span class="m-badge">FirstWord AI Clinical Assessment Summary</span>
+          <h3>স্পিচ অ্যান্ড ল্যাঙ্গুয়েজ থেরাপিস্ট রিপোর্ট</h3>
+        </div>
+        <button class="close-modal-btn" onclick="closeTherapistShareModal()">×</button>
+      </div>
+
+      <div class="modal-body" id="print-section">
+        <div class="report-meta-header">
+          <div>
+            <p><strong>রোগী/শিশুর নাম:</strong> আরিয়ান আহমেদ (Aryan Ahmed)</p>
+            <p><strong>বয়স:</strong> ৪ বছর ৮ মাস | <strong>মূল্যায়ন তারিখ:</strong> অক্টোবর ২০২৬</p>
+          </div>
+          <div class="meta-right">
+            <p><strong>সেশনের সংখ্যা:</strong> ১৮ টি (মোট ৩ ঘণ্টা ৪৫ মিনিট)</p>
+            <p><strong>স্ক্রিনিং স্ট্যাটাস:</strong> মাইল্ড রোটিক সাবস্টিটিউশন (Mild Rhotic /r/-/ɽ/ Substitution)</p>
+          </div>
+        </div>
+
+        <hr class="report-divider">
+
+        <div class="report-summary-box">
+          <h4>ক্লিনিকাল সারাংশ (Executive Summary):</h4>
+          <p>
+            আরিয়ান আহমেদ গত ৩০ দিনে ফার্স্টওয়ার্ড এআই-এর সাথে ১৮টি কথোপকথন সেশনে অংশগ্রহণ করেছে। তার সামগ্রিক রিসেপ্টিভ (শ্রবণ) এবং এক্সপ্রেসভ ভাষা বয়সোপযোগী। তবে ফনোলজিক্যাল আর্টিকুলেশনে তাড়নজাত ‘ড়’ ধ্বনির ক্ষেত্রে দন্ত্য ‘দ’ দ্বারা প্রতিস্থাপন (Substitution) পরিলক্ষিত হয় (উদা: গাড়ি ➔ গাদি, নির্ভুলতা ৫৮%)। এছাড়া বাক্য গঠনের গড় শব্দ দৈর্ঘ্য (MLU) ১.৩ থেকে ক্রমান্বয়ে বৃদ্ধি পেয়ে বর্তমানে ৩.৪ শব্দে পৌঁছেছে।
+          </p>
+        </div>
+
+        <div class="report-data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>মূল্যায়িত ডোমেইন</th>
+                <th>বর্তমান অর্জিত স্কোর</th>
+                <th>বয়সোপযোগী আদর্শ মান</th>
+                <th>পর্যবেক্ষণ ও মন্তব্য</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MLU (Mean Length of Utterance)</td>
+                <td>৩.৪ শব্দ</td>
+                <td>৩.০ - ৪.৫ শব্দ</td>
+                <td>স্বাভাবিক উন্নতিশীল (৪ শব্দের বাক্যে সাবলীল)</td>
+              </tr>
+              <tr>
+                <td>ধ্বনি নির্ভুলতা (Phonology: 'ড়'/'র')</td>
+                <td>৫৮%</td>
+                <td>৮৫%+</td>
+                <td>পর্যবেক্ষণাধীন; স্পিচ গেমিংয়ের মাধ্যমে উন্নতি হচ্ছে</td>
+              </tr>
+              <tr>
+                <td>শব্দভাণ্ডার বৈচিত্র্য (TTR)</td>
+                <td>০.৫৮</td>
+                <td>০.৫০+</td>
+                <td>উচ্চ বৈচিত্র্যপূর্ণ সক্রিয় শব্দ ব্যবহার</td>
+              </tr>
+              <tr>
+                <td>সামাজিক মিথস্ক্রিয়া ও টার্ন টেকিং</td>
+                <td>৮৮%</td>
+                <td>৮০%+</td>
+                <td>কথার ধারাবাহিকতা রক্ষা ও দ্রুত উত্তর দান</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="report-recommendation-box">
+          <h4>সুপারিশ ও পরবর্তী পদক্ষেপ:</h4>
+          <ul>
+            <li>আরও ৪ সপ্তাহ ‘মিথু’র সাথে পাখির ডাক ও ছড়া ভিত্তিক ফনেটিক গেম পরিচালনা করা।</li>
+            <li>যদি ৫ বছর পূর্ণ হওয়ার পরও ‘ড়’ ধ্বনির প্রতিস্থাপন অব্যাহত থাকে, তবে সরাসরি ফেস-টু-ফেস এসএলপি (SLP) ক্লিনিক্যাল ইভালুয়েশনের জন্য রেফার করা হবে।</li>
+          </ul>
+        </div>
+
+        <div class="report-sign-footer">
+          <div class="disclaimer-mini">
+            * Generated by FirstWord AI Clinical Telemetry Engine. For screening assistance only; not a formal medical diagnosis.
+          </div>
+          <div class="signature-line">
+            <span>সিস্টেম জেনারেটেড ডিজিটাল ভেরিফাইড রিপোর্ট</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="game-btn secondary" onclick="closeTherapistShareModal()">বাতিল করুন</button>
+        <button class="game-btn primary" onclick="window.print()">
+          <i data-lucide="printer"></i>
+          <span>প্রিন্ট / PDF আকারে সেভ করুন</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Tone FX & Toast Message -->
+  <div class="toast-notification" id="app-toast">
+    <i data-lucide="check-circle" id="toast-icon"></i>
+    <span id="toast-msg">সফল হয়েছে!</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
